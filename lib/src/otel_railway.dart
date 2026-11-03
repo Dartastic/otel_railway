@@ -1,11 +1,12 @@
-// Licensed under the Dartastic Pro Software License Agreement.
+// Licensed under the Apache License, Version 2.0
 // Copyright 2025-2026 Mindful Software LLC d/b/a Dartastic.io, All rights reserved.
 
-import 'package:dartastic_opentelemetry/dartastic_opentelemetry.dart';
+import 'package:dartastic_opentelemetry_api/dartastic_opentelemetry_api.dart';
 
 import 'otel_railway_suppression.dart';
 
 class RailwayResult {
+  /// Creates a result.
   const RailwayResult({
     this.teamId,
     this.projectId,
@@ -59,8 +60,13 @@ class RailwayResult {
   final String? errorMessage;
 }
 
+/// What a traced call returned: the value for the caller plus fields
+/// recorded on the span.
 class RailwayCallResult<T> {
+  /// Creates a call result.
   const RailwayCallResult({required this.value, this.result});
+
+  /// The value returned to the caller.
   final T value;
   final RailwayResult? result;
 }
@@ -68,125 +74,133 @@ class RailwayCallResult<T> {
 Future<T> tracedRailway<T>({
   required String operation,
   required Future<RailwayCallResult<T>> Function() invoke,
-  Tracer? tracer,
+  APITracer? tracer,
 }) async {
   if (railwayInstrumentationSuppressed()) {
     final r = await invoke();
     return r.value;
   }
-  final t = tracer ?? OTel.tracerProvider().getTracer('otel_railway');
+  final t = tracer ?? OTelAPI.tracerProvider().getTracer('otel_railway');
   final span = t.startSpan('railway $operation', kind: SpanKind.client);
   try {
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.system', 'railway')]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.system', 'railway')]));
     span.addAttributes(
-        OTel.attributes([OTel.attributeString('rpc.method', operation)]));
+        OTelAPI.attributes([OTelAPI.attributeString('rpc.method', operation)]));
     final r = await invoke();
     final res = r.result;
     if (res != null) {
       if (res.teamId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.team.id', res.teamId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.team.id', res.teamId!)]));
       }
       if (res.projectId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.project.id', res.projectId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.project.id', res.projectId!)]));
       }
       if (res.projectName != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.project.name', res.projectName!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('railway.project.name', res.projectName!)
+        ]));
       }
       if (res.environmentId != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('railway.environment.id', res.environmentId!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('railway.environment.id', res.environmentId!)
         ]));
       }
       if (res.environmentName != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('railway.environment.name', res.environmentName!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              'railway.environment.name', res.environmentName!)
         ]));
       }
       if (res.serviceId != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.service.id', res.serviceId!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.service.id', res.serviceId!)]));
       }
       if (res.serviceName != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.service.name', res.serviceName!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('railway.service.name', res.serviceName!)
+        ]));
       }
       if (res.region != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.region', res.region!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.region', res.region!)]));
       }
       if (res.builder != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.builder', res.builder!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.builder', res.builder!)]));
       }
       if (res.deploymentId != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString('railway.deployment.id', res.deploymentId!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('railway.deployment.id', res.deploymentId!)
         ]));
       }
       if (res.deploymentStatus != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'railway.deployment.status', res.deploymentStatus!)
         ]));
       }
       if (res.deploymentTrigger != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
               'railway.deployment.trigger', res.deploymentTrigger!)
         ]));
       }
       if (res.gitProvider != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.git.provider', res.gitProvider!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString('railway.git.provider', res.gitProvider!)
+        ]));
       }
       if (res.gitBranch != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.git.branch', res.gitBranch!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.git.branch', res.gitBranch!)]));
       }
       if (res.gitCommit != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.git.commit', res.gitCommit!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.git.commit', res.gitCommit!)]));
       }
       if (res.replicaCount != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('railway.replica.count', res.replicaCount!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('railway.replica.count', res.replicaCount!)
+        ]));
       }
       if (res.pluginKind != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.plugin.kind', res.pluginKind!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.plugin.kind', res.pluginKind!)]));
       }
       if (res.volumeSizeGb != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('railway.volume.size_gb', res.volumeSizeGb!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('railway.volume.size_gb', res.volumeSizeGb!)
+        ]));
       }
       if (res.usageCpuVcpuMillis != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeInt(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt(
               'railway.usage.cpu_vcpu_millis', res.usageCpuVcpuMillis!)
         ]));
       }
       if (res.usageMemoryGbMillis != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeInt(
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt(
               'railway.usage.memory_gb_millis', res.usageMemoryGbMillis!)
         ]));
       }
       if (res.usageNetworkGb != null) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeDouble('railway.usage.network_gb', res.usageNetworkGb!)
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeDouble(
+              'railway.usage.network_gb', res.usageNetworkGb!)
         ]));
       }
       if (res.statusCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeInt('http.response.status_code', res.statusCode!)]));
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeInt('http.response.status_code', res.statusCode!)
+        ]));
       }
       if (res.errorCode != null) {
-        span.addAttributes(OTel.attributes(
-            [OTel.attributeString('railway.error.code', res.errorCode!)]));
+        span.addAttributes(OTelAPI.attributes(
+            [OTelAPI.attributeString('railway.error.code', res.errorCode!)]));
       }
       final fail = res.errorCode != null ||
           (res.statusCode != null && res.statusCode! >= 400) ||
@@ -194,9 +208,9 @@ Future<T> tracedRailway<T>({
           res.deploymentStatus == 'CRASHED' ||
           res.deploymentStatus == 'REMOVED';
       if (fail) {
-        span.addAttributes(OTel.attributes([
-          OTel.attributeString(
-              ErrorResource.errorType.key, res.errorCode ?? 'railway.error')
+        span.addAttributes(OTelAPI.attributes([
+          OTelAPI.attributeString(
+              ErrorAttributes.errorType.key, res.errorCode ?? 'railway.error')
         ]));
         span.setStatus(SpanStatusCode.Error, res.errorMessage);
       }
